@@ -28,7 +28,7 @@ properties = testGroup
     [testProperty "Addition is Communative" testAdditionCommunative]
   where
     testAdditionCommunative :: Property
-    testAdditionCommunative = do
+    testAdditionCommunative = property $ do
         let genInt = Gen.int $ Range.linear 0 9001
         (a, b) <- forAll $ (,) <$> genInt <*> genInt
         (a + b) === (b + a)
