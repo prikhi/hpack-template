@@ -6,8 +6,11 @@ A stack template for an executable, libary, and test-suite using `hpack`'s
 The test-suite is built using `tasty` and uses `HUnit` for unit tests and
 `hedgehog` for property tests.
 
-To start a new project with this template, run `stack new <project-name>
-https://raw.githubusercontent.com/prikhi/hpack-template/master/hpack.hsfiles`.
+To start a new project with this template, run:
+
+```
+stack new <project-name> https://raw.githubusercontent.com/prikhi/hpack-template/master/hpack.hsfiles
+```
 
 
 ## Generation
