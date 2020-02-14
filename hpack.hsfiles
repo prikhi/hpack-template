@@ -31,6 +31,10 @@ main = putStrLn "hello world"
 import Distribution.Simple
 main = defaultMain
 
+{-# START_FILE .gitignore #-}
+{{name}}.cabal
+.stack-work/
+
 {-# START_FILE package.yaml #-}
 ---
 
