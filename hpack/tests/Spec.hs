@@ -1,6 +1,6 @@
 import           Hedgehog
 import           Test.Tasty
-import           Test.Tasty.Hunit
+import           Test.Tasty.HUnit
 import           Test.Tasty.Hedgehog
 
 import qualified Hedgehog.Gen                  as Gen
