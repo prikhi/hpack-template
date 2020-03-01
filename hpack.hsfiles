@@ -4,14 +4,26 @@
 Describe your project here.
 
 
-## Build / Run
+## Build
 
-You can build the project with stack: `stack build`
+You can build the project with stack:
+
+```
+stack build
+```
 
 For development, you can enable fast builds with file-watching,
-documentation-building, & test-running: `stack test --haddock --fast --file-watch`
+documentation-building, & test-running:
 
-To build & open the documentation, run `stack haddock --open {{name}}`
+```
+stack test --haddock --fast --file-watch --pedantic
+```
+
+To build & open the documentation, run
+
+```
+stack haddock --open {{name}}
+```
 
 
 ## LICENSE
