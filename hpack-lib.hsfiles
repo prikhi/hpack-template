@@ -1,0 +1,460 @@
+{-# START_FILE README.md #-}
+# {{name}}
+
+[![{{name}} Build Status](https://travis-ci.org/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}.svg?branch=master)](https://travis-ci.org/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}})
+
+
+Describe your project here.
+
+
+## Build
+
+You can build the project with stack:
+
+```
+stack build
+```
+
+For development, you can enable fast builds with file-watching,
+documentation-building, & test-running:
+
+```
+stack test --haddock --fast --file-watch --pedantic
+```
+
+To build & open the documentation, run
+
+```
+stack haddock --open {{name}}
+```
+
+
+## LICENSE
+
+BSD-3
+
+{-# START_FILE Setup.hs #-}
+import Distribution.Simple
+main = defaultMain
+
+{-# START_FILE src/Lib.hs #-}
+module Lib where
+
+{-# START_FILE .gitignore #-}
+{{name}}.cabal
+.stack-work/
+
+{-# START_FILE tests/Spec.hs #-}
+import           Hedgehog
+import           Test.Tasty
+import           Test.Tasty.HUnit
+import           Test.Tasty.Hedgehog
+
+import qualified Hedgehog.Gen                  as Gen
+import qualified Hedgehog.Range                as Range
+
+
+main :: IO ()
+main = defaultMain tests
+
+
+tests :: TestTree
+tests = testGroup "Tests" [unitTests, properties]
+
+
+unitTests :: TestTree
+unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
+  where
+    testAddition :: Assertion
+    testAddition = (2 + 2) @?= (4 :: Integer)
+
+
+properties :: TestTree
+properties = testGroup
+    "Properties"
+    [testProperty "Addition is Communative" testAdditionCommunative]
+  where
+    testAdditionCommunative :: Property
+    testAdditionCommunative = property $ do
+        let genInt = Gen.int $ Range.linear 0 9001
+        (a, b) <- forAll $ (,) <$> genInt <*> genInt
+        (a + b) === (b + a)
+
+{-# START_FILE LICENSE #-}
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+{-# START_FILE .travis.yml #-}
+---
+# This is the complex Travis configuration, which is intended for use
+# on open source libraries which need compatibility across multiple GHC
+# versions, must work with cabal-install, and should be
+# cross-platform. For more information and other options, see:
+#
+# https://docs.haskellstack.org/en/stable/travis_ci/
+#
+# Copy these contents into the root directory of your Github project in a file
+# named .travis.yml
+
+# Run jobs on Linux unless "os" is specified explicitly.
+os: linux
+
+# Do not choose a language; we provide our own build tools.
+language: generic
+
+# Caching so the next build will be fast too.
+cache:
+  directories:
+    - $HOME/.ghc
+    - $HOME/.cabal
+    - $HOME/.stack
+    - $TRAVIS_BUILD_DIR/.stack-work
+
+# The different configurations we want to test. We have BUILD=cabal which uses
+# cabal-install, and BUILD=stack which uses Stack. More documentation on each
+# of those below.
+#
+# We set the compiler values here to tell Travis to use a different
+# cache file per set of arguments.
+#
+# If you need to have different apt packages for each combination in the
+# job matrix, you can use a line such as:
+#     addons: {apt: {packages: [libfcgi-dev,libgmp-dev]}}
+jobs:
+  include:
+    # We grab the appropriate GHC and cabal-install versions from hvr's PPA. See:
+    # https://github.com/hvr/multi-ghc-travis
+    - env: BUILD=cabal GHCVER=7.0.4 CABALVER=1.16 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 7.0.4"
+      addons: {apt: {packages: [cabal-install-1.16,ghc-7.0.4,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=7.2.2 CABALVER=1.16 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 7.2.2"
+      addons: {apt: {packages: [cabal-install-1.16,ghc-7.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=7.4.2 CABALVER=1.16 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 7.4.2"
+      addons: {apt: {packages: [cabal-install-1.16,ghc-7.4.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=7.6.3 CABALVER=1.16 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 7.6.3"
+      addons: {apt: {packages: [cabal-install-1.16,ghc-7.6.3,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=7.8.4 CABALVER=1.18 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 7.8.4"
+      addons: {apt: {packages: [cabal-install-1.18,ghc-7.8.4,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=7.10.3 CABALVER=1.22 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 7.10.3"
+      addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.3,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=8.0.2 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 8.0.2"
+      addons: {apt: {packages: [cabal-install-1.24,ghc-8.0.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=8.2.2 CABALVER=2.0 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 8.2.2"
+      addons: {apt: {packages: [cabal-install-2.0,ghc-8.2.2,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=8.4.4 CABALVER=2.2 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 8.4.4"
+      addons: {apt: {packages: [cabal-install-2.2,ghc-8.4.4,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+    - env: BUILD=cabal GHCVER=8.6.5 CABALVER=2.4 HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC 8.6.5"
+      addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.5,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+
+    # Build with the newest GHC and cabal-install. This is an accepted failure,
+    # see below.
+    - env: BUILD=cabal GHCVER=head  CABALVER=head HAPPYVER=1.19.5 ALEXVER=3.1.7
+      compiler: ": #GHC HEAD"
+      addons: {apt: {packages: [cabal-install-head,ghc-head,happy-1.19.5,alex-3.1.7], sources: [hvr-ghc]}}
+
+    # The Stack builds. We can pass in arbitrary Stack arguments via the ARGS
+    # variable, such as using --stack-yaml to point to a different file.
+    - env: BUILD=stack ARGS=""
+      compiler: ": #stack default"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-2"
+      compiler: ": #stack 7.8.4"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-3"
+      compiler: ": #stack 7.10.2"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-6"
+      compiler: ": #stack 7.10.3"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-7"
+      compiler: ": #stack 8.0.1"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-9"
+      compiler: ": #stack 8.0.2"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-11"
+      compiler: ": #stack 8.2.2"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-12"
+      compiler: ": #stack 8.4.4"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    - env: BUILD=stack ARGS="--resolver lts-14"
+      compiler: ": #stack 8.6.5"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    # Nightly builds are allowed to fail
+    - env: BUILD=stack ARGS="--resolver nightly"
+      compiler: ": #stack nightly"
+      addons: {apt: {packages: [libgmp-dev]}}
+
+    # Build on macOS in addition to Linux
+    - env: BUILD=stack ARGS=""
+      compiler: ": #stack default osx"
+      os: osx
+
+    # Travis includes an macOS which is incompatible with GHC 7.8.4
+    #- env: BUILD=stack ARGS="--resolver lts-2"
+    #  compiler: ": #stack 7.8.4 osx"
+    #  os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-3"
+      compiler: ": #stack 7.10.2 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-6"
+      compiler: ": #stack 7.10.3 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-7"
+      compiler: ": #stack 8.0.1 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-9"
+      compiler: ": #stack 8.0.2 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-11"
+      compiler: ": #stack 8.2.2 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-12"
+      compiler: ": #stack 8.4.4 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver lts-14"
+      compiler: ": #stack 8.6.5 osx"
+      os: osx
+
+    - env: BUILD=stack ARGS="--resolver nightly"
+      compiler: ": #stack nightly osx"
+      os: osx
+
+  allow_failures:
+    - env: BUILD=cabal GHCVER=head  CABALVER=head HAPPYVER=1.19.5 ALEXVER=3.1.7
+    - env: BUILD=stack ARGS="--resolver nightly"
+
+before_install:
+  # Using compiler above sets CC to an invalid value, so unset it
+  - unset CC
+
+  # We want to always allow newer versions of packages when building on GHC HEAD
+  - CABALARGS=""
+  - if [ "x$GHCVER" = "xhead" ]; then CABALARGS=--allow-newer; fi
+
+  # Download and unpack the stack executable
+  - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$HOME/.local/bin:/opt/alex/$ALEXVER/bin:/opt/happy/$HAPPYVER/bin:$HOME/.cabal/bin:$PATH
+  - mkdir -p ~/.local/bin
+  - |
+    if [ `uname` = "Darwin" ]
+    then
+      travis_retry curl --insecure -L https://get.haskellstack.org/stable/osx-x86_64.tar.gz | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
+    else
+      travis_retry curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+    fi
+
+    # Use the more reliable S3 mirror of Hackage
+    mkdir -p $HOME/.cabal
+    echo 'remote-repo: hackage.haskell.org:http://hackage.fpcomplete.com/' > $HOME/.cabal/config
+    echo 'remote-repo-cache: $HOME/.cabal/packages' >> $HOME/.cabal/config
+
+
+install:
+  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+  - if [ -f configure.ac ]; then autoreconf -i; fi
+  - |
+    set -ex
+    case "$BUILD" in
+      stack)
+        # Add in extra-deps for older snapshots, as necessary
+        #
+        # This is disabled by default, as relying on the solver like this can
+        # make builds unreliable. Instead, if you have this situation, it's
+        # recommended that you maintain multiple stack-lts-X.yaml files.
+
+        #stack --no-terminal --install-ghc $ARGS test --bench --dry-run || ( \
+        #  stack --no-terminal $ARGS build cabal-install && \
+        #  stack --no-terminal $ARGS solver --update-config)
+
+        # Build the dependencies
+        stack --no-terminal --install-ghc $ARGS test --bench --only-dependencies
+        ;;
+      cabal)
+        cabal --version
+        travis_retry cabal update
+
+        # Get the list of packages from the stack.yaml file. Note that
+        # this will also implicitly run hpack as necessary to generate
+        # the .cabal files needed by cabal-install.
+        PACKAGES=$(stack --install-ghc query locals | grep '^ *path' | sed 's@^ *path:@@')
+
+        cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0 --reorder-goals --max-backjumps=-1 $CABALARGS $PACKAGES
+        ;;
+    esac
+    set +ex
+
+script:
+  - |
+    set -ex
+    case "$BUILD" in
+      stack)
+        stack --no-terminal $ARGS test --bench --no-run-benchmarks --haddock --no-haddock-deps
+        ;;
+      cabal)
+        cabal install --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0 --reorder-goals --max-backjumps=-1 $CABALARGS $PACKAGES
+
+        ORIGDIR=$(pwd)
+        for dir in $PACKAGES
+        do
+          cd $dir
+          cabal check || [ "$CABALVER" == "1.16" ]
+          cabal sdist
+          PKGVER=$(cabal info . | awk '{print $2;exit}')
+          SRC_TGZ=$PKGVER.tar.gz
+          cd dist
+          tar zxfv "$SRC_TGZ"
+          cd "$PKGVER"
+          cabal configure --enable-tests --ghc-options -O0
+          cabal build
+          if [ "$CABALVER" = "1.16" ] || [ "$CABALVER" = "1.18" ]; then
+            cabal test
+          else
+            cabal test --show-details=streaming --log=/dev/stdout
+          fi
+          cd $ORIGDIR
+        done
+        ;;
+    esac
+    set +ex
+
+{-# START_FILE CHANGELOG.md #-}
+# CHANGELOG
+
+## v0.1.0.0
+
+* Initial release
+
+{-# START_FILE package.yaml #-}
+---
+
+name:
+    {{name}}
+version:
+    0.1.0.0
+github:
+    {{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}
+homepage:
+    https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme
+license:
+    BSD3
+license-file:
+    LICENSE
+author:
+    {{author-name}}{{^author-name}}Author name here{{/author-name}}
+maintainer:
+    {{author-email}}{{^author-email}}example@example.com{{/author-email}}
+copyright:
+    {{copyright}}{{^copyright}}{{year}}{{^year}}2020{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+category:
+    {{category}}{{^category}}Web{{/category}}
+extra-source-files:
+    - README.md
+    - CHANGELOG.md
+
+
+synopsis:
+    Short, one-line summary of project here.
+
+description: |
+    Longer description of package here.
+
+    Maybe include a simple usage example.
+
+
+ghc-options:
+    - -Wall
+when:
+    condition:
+        impl(ghc >= 8.0)
+    then:
+        ghc-options:
+            - -Wcompat
+            - -Wincomplete-record-updates
+            - -Wincomplete-uni-patterns
+            - -Wredundant-constraints
+    else:
+        ghc-options:
+            - -fwarn-incomplete-record-updates
+            - -fwarn-incomplete-uni-patterns
+
+
+dependencies:
+    - base >= 4.3 && < 5
+    - base-compat-batteries
+
+
+library:
+    source-dirs:
+        src
+    dependencies:
+        []
+
+tests:
+    {{name}}-test:
+        main: Spec.hs
+        source-dirs:
+            tests
+        ghc-options:
+            - -threaded
+            - -rtsopts
+            - -with-rtsopts "-N -T"
+        dependencies:
+            - {{name}}
+            - hedgehog
+            - tasty
+            - tasty-hedgehog
+            - tasty-hunit
