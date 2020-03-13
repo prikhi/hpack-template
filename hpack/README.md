@@ -1,5 +1,8 @@
 # {{name}}
 
+[![{{name}} Build Status](https://travis-ci.org/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}.svg?branch=master)](https://travis-ci.org/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}})
+
+
 Describe your project here.
 
 
