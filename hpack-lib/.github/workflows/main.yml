@@ -1,0 +1,85 @@
+---
+
+name: CI Builds
+
+# yamllint disable-line rule:truthy
+on:
+  # Run Daily
+  schedule:
+    - cron: '0 0 * * *'
+  # Run on Push
+  push:
+  # Run on Tag Creation
+  create:
+  # Allow Running Manually
+  workflow_dispatch:
+
+jobs:
+  # Last 2 Stackage LTSes
+  build-stack:
+    name: Stack
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        resolver: ['lts-17', 'lts-18']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Stack Artifacts
+        uses: actions/cache@v2
+        with:
+          key: stack-build-${{ matrix.resolver }}
+          path: |
+            ~/.stack/
+            .stack-work/
+      - uses: haskell/actions/setup@v1
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - run: stack test --fast --haddock --pedantic --resolver ${{ matrix.resolver }}   # yamllint disable-line rule:line-length
+
+
+  # Stackage Nightly - Failures Allowed
+  build-nightly:
+    name: Stackage Nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Stack Artifacts
+        uses: actions/cache@v2
+        with:
+          key: stack-build-nightly
+          path: |
+            ~/.stack/
+            .stack-work/
+      - uses: haskell/actions/setup@v1
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - run: stack test --fast --haddock --pedantic --resolver nightly
+        continue-on-error: true
+
+
+  # Cabal Builds w/ 3 Latest GHC Versions
+  build-cabal:
+    name: GHC / Cabal
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: ['8.8', '8.10', '9.0']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Cabal Artifacts
+        uses: actions/cache@v2
+        with:
+          key: cabal-build-${{ matrix.ghc }}
+          path: |
+            ~/.cabal/packages/
+            ~/.cabal/store
+            dist-newstyle/
+      - uses: haskell/actions/setup@v1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: latest
+          enable-stack: true
+      - run: cabal update
+      - run: cabal new-test && cabal new-haddock

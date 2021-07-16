@@ -7,30 +7,50 @@ main = putStrLn "hello world"
 {-# START_FILE README.md #-}
 # {{name}}
 
-[![{{name}} Build Status](https://travis-ci.org/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}.svg?branch=master)](https://travis-ci.org/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}})
+[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
 
 
 Describe your project here.
+
+Requires [`stack`][get-stack]:
+
+```sh
+stack run
+```
+
+[get-stack]: https://docs.haskellstack.org/en/stable/README/
+
+
+## Install
+
+You can install the CLI exe by running `stack install`. This lets you call the
+executable directly instead of through stack:
+
+```sh
+stack install
+export PATH="${HOME}/.local/bin/:${PATH}"
+{{name}}
+```
 
 
 ## Build
 
 You can build the project with stack:
 
-```
+```sh
 stack build
 ```
 
 For development, you can enable fast builds with file-watching,
 documentation-building, & test-running:
 
-```
+```sh
 stack test --haddock --fast --file-watch --pedantic
 ```
 
 To build & open the documentation, run
 
-```
+```sh
 stack haddock --open {{name}}
 ```
 
@@ -118,56 +138,92 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-{-# START_FILE .travis.yml #-}
----
-
-# This is the simple Travis configuration, which is intended for use
-# on applications which do not require cross-platform and
-# multiple-GHC-version support. For more information and other
-# options, see:
-#
-# https://docs.haskellstack.org/en/stable/travis_ci/
-#
-# Copy these contents into the root directory of your Github project in a file
-# named .travis.yml
-
-# Choose a build environment
-dist: xenial
-
-# Do not choose a language; we provide our own build tools.
-language: generic
-
-# Caching so the next build will be fast too.
-cache:
-  directories:
-    - $HOME/.stack
-
-# Ensure necessary system libraries are present
-addons:
-  apt:
-    packages:
-      - libgmp-dev
-
-before_install:
-  # Download and unpack the stack executable
-  - mkdir -p ~/.local/bin
-  - export PATH=$HOME/.local/bin:$PATH
-  - travis_retry curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
-
-install:
-  # Build dependencies
-  - stack --no-terminal --install-ghc test --only-dependencies
-
-script:
-  # Build the package, its tests, and its docs and run the tests
-  - stack --no-terminal test --haddock --no-haddock-deps
-
 {-# START_FILE CHANGELOG.md #-}
 # CHANGELOG
 
 ## v0.1.0.0
 
 * Initial release
+
+{-# START_FILE .github/workflows/main.yml #-}
+---
+
+name: CI Build
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * *'
+  pull_request:
+  create:
+  workflow_dispatch:
+
+jobs:
+  build-stack:
+    name: Stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Stack Artifacts
+        uses: actions/cache@v2
+        with:
+          key: stack-build-lts
+          path: |
+            ~/.stack/
+            .stack-work/
+      - uses: haskell/actions/setup@v1
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - run: stack test --fast --haddock --pedantic --resolver lts-18
+
+  # Stackage Nightly - Failures Allowed
+  build-nightly:
+    name: Stackage Nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Stack Artifacts
+        uses: actions/cache@v2
+        with:
+          key: stack-build-nightly
+          path: |
+            ~/.stack/
+            .stack-work/
+      - uses: haskell/actions/setup@v1
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - run: stack test --fast --haddock --pedantic --resolver nightly
+        continue-on-error: true
+
+  # Cabal Builds w/ 3 Latest GHC Versions
+  build-cabal:
+    name: GHC / Cabal
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: ['8.8', '8.10', '9.0']
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Cabal Artifacts
+        uses: actions/cache@v2
+        with:
+          key: cabal-build-${{ matrix.ghc }}
+          path: |
+            ~/.cabal/packages/
+            ~/.cabal/store
+            dist-newstyle/
+      - uses: haskell/actions/setup@v1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: latest
+          enable-stack: true
+      - run: cabal update
+      - run: cabal new-test && cabal new-haddock
 
 {-# START_FILE package.yaml #-}
 ---
