@@ -50,6 +50,16 @@ when:
             - -fwarn-incomplete-record-updates
             - -fwarn-incomplete-uni-patterns
 
+default-extensions:
+    - DeriveGeneric
+    - LambdaCase
+    - NamedFieldPuns
+    - OverloadedStrings
+    - TupleSections
+    - TypeApplications
+    - TypeOperators
+    - ViewPatterns
+
 
 dependencies:
     - base >= 4.3 && < 5
