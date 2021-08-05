@@ -125,6 +125,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {-# START_FILE .github/workflows/main.yml #-}
 ---
+# yamllint disable rule:line-length
 
 name: CI Builds
 
@@ -153,15 +154,19 @@ jobs:
       - name: Cache Stack Artifacts
         uses: actions/cache@v2
         with:
-          key: stack-build-${{ matrix.resolver }}
+          key: stack-build-${{ matrix.resolver }}-${{ github.ref }}-${{ github.sha }}
           path: |
             ~/.stack/
             .stack-work/
+          restore-keys: |
+            stack-build-${{ matrix.resolver }}-${{ github.ref }}-
+            stack-build-${{ matrix.resolver }}-
+            stack-build-
       - uses: haskell/actions/setup@v1
         with:
           enable-stack: true
           stack-no-global: true
-      - run: stack test --fast --haddock --pedantic --resolver ${{ matrix.resolver }}   # yamllint disable-line rule:line-length
+      - run: stack test --fast --haddock --pedantic --resolver ${{ matrix.resolver }}
 
 
   # Stackage Nightly - Failures Allowed
@@ -170,13 +175,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Get Current Date
+        id: date
+        run: echo -e "::set-output name=year::$(date +%Y)\n::set-output name=month::$(date +%m)\n::set-output name=day::$(date +%d)"
       - name: Cache Stack Artifacts
         uses: actions/cache@v2
         with:
-          key: stack-build-nightly
+          key: stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-${{ github.ref }}-${{ github.sha }}
           path: |
             ~/.stack/
             .stack-work/
+          restore-keys: |
+            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-${{ github.ref }}-
+            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-
+            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-
+            stack-build-nightly-${{ steps.date.outputs.year }}-
+            stack-build-nightly-
       - uses: haskell/actions/setup@v1
         with:
           enable-stack: true
@@ -197,11 +211,15 @@ jobs:
       - name: Cache Cabal Artifacts
         uses: actions/cache@v2
         with:
-          key: cabal-build-${{ matrix.ghc }}
+          key: cabal-build-${{ matrix.ghc }}-${{ github.ref }}-${{ github.sha }}
           path: |
             ~/.cabal/packages/
             ~/.cabal/store
             dist-newstyle/
+          restore-keys: |
+            cabal-build-${{ matrix.ghc }}-${{ github.ref }}-
+            cabal-build-${{ matrix.ghc }}-
+            cabal-build-
       - uses: haskell/actions/setup@v1
         with:
           ghc-version: ${{ matrix.ghc }}
