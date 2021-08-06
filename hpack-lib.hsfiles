@@ -45,7 +45,6 @@ main = defaultMain
 module Lib where
 
 {-# START_FILE .gitignore #-}
-{{name}}.cabal
 .stack-work/
 
 {-# START_FILE tests/Spec.hs #-}
