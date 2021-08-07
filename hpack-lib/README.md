@@ -25,7 +25,7 @@ documentation-building, & test-running:
 stack test --haddock --fast --file-watch --pedantic
 ```
 
-To build & open the documentation, run
+To build & open the documentation, run:
 
 ```sh
 stack haddock --open {{name}}

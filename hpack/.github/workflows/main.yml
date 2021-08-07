@@ -5,13 +5,14 @@ name: CI Build
 
 # yamllint disable-line rule:truthy
 on:
-  push:
-    branches:
-      - master
+  # Run Daily
   schedule:
     - cron: '0 0 * * *'
-  pull_request:
+  # Run on Push
+  push:
+  # Run on Tag Creation
   create:
+  # Allow Running Manually
   workflow_dispatch:
 
 jobs:
