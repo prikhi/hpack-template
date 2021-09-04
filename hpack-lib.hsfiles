@@ -123,6 +123,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * Initial release
 
 {-# START_FILE .github/workflows/main.yml #-}
+{{=<% %>=}}
 ---
 # yamllint disable rule:line-length
 
@@ -226,6 +227,7 @@ jobs:
           enable-stack: true
       - run: cabal update
       - run: cabal new-test --enable-tests && cabal new-haddock
+<%={{  }}=%>
 
 {-# START_FILE package.yaml #-}
 ---

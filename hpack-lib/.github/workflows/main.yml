@@ -1,3 +1,4 @@
+{{=<% %>=}}
 ---
 # yamllint disable rule:line-length
 
@@ -101,3 +102,4 @@ jobs:
           enable-stack: true
       - run: cabal update
       - run: cabal new-test --enable-tests && cabal new-haddock
+<%={{  }}=%>
