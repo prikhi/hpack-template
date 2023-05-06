@@ -17,7 +17,7 @@ author:
 maintainer:
     {{author-email}}{{^author-email}}example@example.com{{/author-email}}
 copyright:
-    {{copyright}}{{^copyright}}{{year}}{{^year}}2021{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+    {{copyright}}{{^copyright}}{{year}}{{^year}}2023{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
 category:
     {{category}}{{^category}}Web{{/category}}
 extra-source-files:
@@ -34,22 +34,30 @@ description: |
     Maybe include a simple usage example.
 
 
+language: GHC2021
+
 ghc-options:
     - -Wall
     - -Wcompat
+    - -Wimplicit-lift
+    - -Wincomplete-patterns
     - -Wincomplete-record-updates
     - -Wincomplete-uni-patterns
+    - -Wmissing-exported-signatures
+    - -Wmissing-methods
+    - -Wmissing-signatures
+    - -Wname-shadowing
+    - -Wredundant-bang-patterns
     - -Wredundant-constraints
+    - -Wunused-packages
     - -O2
 
 default-extensions:
-    - DeriveGeneric
+    - DerivingStrategies
     - LambdaCase
-    - NamedFieldPuns
+    - MultiWayIf
     - OverloadedStrings
-    - TupleSections
-    - TypeApplications
-    - TypeOperators
+    - RecordWildCards
     - ViewPatterns
 
 
@@ -85,6 +93,7 @@ tests:
             - -threaded
             - -rtsopts
             - -with-rtsopts "-N -T"
+            - -Wno-unused-packages
         dependencies:
             - {{name}}
             - hedgehog

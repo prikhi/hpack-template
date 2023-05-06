@@ -1,87 +1,5 @@
-{-# START_FILE README.md #-}
-# {{name}}
-
-[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
-
-
-Describe your project here.
-
-Requires [`stack`][get-stack]:
-
-[get-stack]: https://docs.haskellstack.org/en/stable/README/
-
-
-## Build
-
-You can build the project with stack:
-
-```sh
-stack build
-```
-
-For development, you can enable fast builds with file-watching,
-documentation-building, & test-running:
-
-```sh
-stack test --haddock --fast --file-watch --pedantic
-```
-
-To build & open the documentation, run:
-
-```sh
-stack haddock --open {{name}}
-```
-
-
-## LICENSE
-
-BSD-3
-
-{-# START_FILE Setup.hs #-}
-import Distribution.Simple
-main = defaultMain
-
-{-# START_FILE src/Lib.hs #-}
-module Lib where
-
 {-# START_FILE .gitignore #-}
 .stack-work/
-
-{-# START_FILE tests/Spec.hs #-}
-import           Hedgehog
-import           Test.Tasty
-import           Test.Tasty.HUnit
-import           Test.Tasty.Hedgehog
-
-import qualified Hedgehog.Gen                  as Gen
-import qualified Hedgehog.Range                as Range
-
-
-main :: IO ()
-main = defaultMain tests
-
-
-tests :: TestTree
-tests = testGroup "Tests" [unitTests, properties]
-
-
-unitTests :: TestTree
-unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
-  where
-    testAddition :: Assertion
-    testAddition = (2 + 2) @?= (4 :: Integer)
-
-
-properties :: TestTree
-properties = testGroup
-    "Properties"
-    [testProperty "Addition is Communative" testAdditionCommunative]
-  where
-    testAdditionCommunative :: Property
-    testAdditionCommunative = property $ do
-        let genInt = Gen.int $ Range.linear 0 9001
-        (a, b) <- forAll $ (,) <$> genInt <*> genInt
-        (a + b) === (b + a)
 
 {-# START_FILE LICENSE #-}
 Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
@@ -114,120 +32,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-{-# START_FILE CHANGELOG.md #-}
-# CHANGELOG
-
-## v0.1.0.0
-
-* Initial release
-
-{-# START_FILE .github/workflows/main.yml #-}
-{{=<% %>=}}
----
-# yamllint disable rule:line-length
-
-name: CI Builds
-
-# yamllint disable-line rule:truthy
-on:
-  # Run Daily
-  schedule:
-    - cron: '0 0 * * *'
-  # Run on Push
-  push:
-  # Run on Tag Creation
-  create:
-  # Allow Running Manually
-  workflow_dispatch:
-
-jobs:
-  # Last 2 Stackage LTSes
-  build-stack:
-    name: Stack
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        resolver: ['lts-17', 'lts-18']
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache Stack Artifacts
-        uses: actions/cache@v2
-        with:
-          key: stack-build-${{ matrix.resolver }}-${{ github.ref }}-${{ github.sha }}
-          path: |
-            ~/.stack/
-            .stack-work/
-          restore-keys: |
-            stack-build-${{ matrix.resolver }}-${{ github.ref }}-
-            stack-build-${{ matrix.resolver }}-
-            stack-build-
-      - uses: haskell/actions/setup@v1
-        with:
-          enable-stack: true
-          stack-no-global: true
-      - run: stack test --fast --haddock --pedantic --resolver ${{ matrix.resolver }}
-
-
-  # Stackage Nightly - Failures Allowed
-  build-nightly:
-    name: Stackage Nightly
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Get Current Date
-        id: date
-        run: echo -e "::set-output name=year::$(date +%Y)\n::set-output name=month::$(date +%m)\n::set-output name=day::$(date +%d)"
-      - name: Cache Stack Artifacts
-        uses: actions/cache@v2
-        with:
-          key: stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-${{ github.ref }}-${{ github.sha }}
-          path: |
-            ~/.stack/
-            .stack-work/
-          restore-keys: |
-            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-${{ github.ref }}-
-            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-
-            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-
-            stack-build-nightly-${{ steps.date.outputs.year }}-
-            stack-build-nightly-
-      - uses: haskell/actions/setup@v1
-        with:
-          enable-stack: true
-          stack-no-global: true
-      - run: stack test --fast --haddock --pedantic --resolver nightly
-        continue-on-error: true
-
-
-  # Cabal Builds w/ 3 Latest GHC Versions
-  build-cabal:
-    name: GHC / Cabal
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ghc: ['8.8', '8.10', '9.0']
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache Cabal Artifacts
-        uses: actions/cache@v2
-        with:
-          key: cabal-build-${{ matrix.ghc }}-${{ github.ref }}-${{ github.sha }}
-          path: |
-            ~/.cabal/packages/
-            ~/.cabal/store
-            dist-newstyle/
-          restore-keys: |
-            cabal-build-${{ matrix.ghc }}-${{ github.ref }}-
-            cabal-build-${{ matrix.ghc }}-
-            cabal-build-
-      - uses: haskell/actions/setup@v1
-        with:
-          ghc-version: ${{ matrix.ghc }}
-          cabal-version: latest
-          enable-stack: true
-      - run: cabal update
-      - run: cabal new-test --enable-tests && cabal new-haddock
-<%={{  }}=%>
 
 {-# START_FILE package.yaml #-}
 ---
@@ -319,3 +123,215 @@ tests:
             - tasty
             - tasty-hedgehog
             - tasty-hunit
+
+{-# START_FILE Setup.hs #-}
+import Distribution.Simple
+
+
+main = defaultMain
+
+{-# START_FILE tests/Spec.hs #-}
+import Hedgehog
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Tasty.Hedgehog
+
+import Hedgehog.Gen qualified as Gen
+import Hedgehog.Range qualified as Range
+
+
+main :: IO ()
+main = defaultMain tests
+
+
+tests :: TestTree
+tests = testGroup "Tests" [unitTests, properties]
+
+
+unitTests :: TestTree
+unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
+  where
+    testAddition :: Assertion
+    testAddition = (2 + 2) @?= (4 :: Integer)
+
+
+properties :: TestTree
+properties =
+    testGroup
+        "Properties"
+        [testProperty "Addition is Communative" testAdditionCommunative]
+  where
+    testAdditionCommunative :: Property
+    testAdditionCommunative = property $ do
+        let genInt = Gen.int $ Range.linear 0 9001
+        (a, b) <- forAll $ (,) <$> genInt <*> genInt
+        (a + b) === (b + a)
+
+{-# START_FILE README.md #-}
+# {{name}}
+
+[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
+
+
+Describe your project here.
+
+Requires [`stack`][get-stack]:
+
+[get-stack]: https://docs.haskellstack.org/en/stable/README/
+
+
+## Build
+
+You can build the project with stack:
+
+```sh
+stack build
+```
+
+For development, you can enable fast builds with file-watching,
+documentation-building, & test-running:
+
+```sh
+stack test --haddock --fast --file-watch --pedantic
+```
+
+To build & open the documentation, run:
+
+```sh
+stack haddock --open {{name}}
+```
+
+
+## LICENSE
+
+BSD-3
+
+{-# START_FILE .github/workflows/main.yml #-}
+{{=<% %>=}}
+---
+# yamllint disable rule:line-length
+
+name: CI Builds
+
+# yamllint disable-line rule:truthy
+on:
+  # Run Daily
+  schedule:
+    - cron: '0 0 * * *'
+  # Run on Push
+  push:
+  # Run on Tag Creation
+  create:
+  # Allow Running Manually
+  workflow_dispatch:
+
+jobs:
+  # Last 2 Stackage LTSes
+  build-stack:
+    name: Stack
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        resolver: ['lts-19', 'lts-20']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache Stack Artifacts
+        uses: actions/cache@v2
+        with:
+          key: stack-build-${{ matrix.resolver }}-${{ github.ref }}-${{ github.sha }}
+          path: |
+            ~/.stack/
+            .stack-work/
+          restore-keys: |
+            stack-build-${{ matrix.resolver }}-${{ github.ref }}-
+            stack-build-${{ matrix.resolver }}-
+            stack-build-
+      - uses: haskell/actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - run: stack test --fast --haddock --pedantic --resolver ${{ matrix.resolver }}
+
+
+  # Stackage Nightly - Failures Allowed
+  build-nightly:
+    name: Stackage Nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Current Date
+        id: date
+        run: echo -e "::set-output name=year::$(date +%Y)\n::set-output name=month::$(date +%m)\n::set-output name=day::$(date +%d)"
+      - name: Cache Stack Artifacts
+        uses: actions/cache@v2
+        with:
+          key: stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-${{ github.ref }}-${{ github.sha }}
+          path: |
+            ~/.stack/
+            .stack-work/
+          restore-keys: |
+            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-${{ github.ref }}-
+            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-${{ steps.date.outputs.day }}-
+            stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-
+            stack-build-nightly-${{ steps.date.outputs.year }}-
+            stack-build-nightly-
+      - uses: haskell/actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-global: true
+      - run: stack test --fast --haddock --pedantic --resolver nightly
+        continue-on-error: true
+
+
+  # Cabal Builds w/ 3 Latest GHC Versions
+  build-cabal:
+    name: GHC / Cabal
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: ['8.10', '9.0', '9.2']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache Cabal Artifacts
+        uses: actions/cache@v2
+        with:
+          key: cabal-build-${{ matrix.ghc }}-${{ github.ref }}-${{ github.sha }}
+          path: |
+            ~/.cabal/packages/
+            ~/.cabal/store
+            dist-newstyle/
+          restore-keys: |
+            cabal-build-${{ matrix.ghc }}-${{ github.ref }}-
+            cabal-build-${{ matrix.ghc }}-
+            cabal-build-
+      - uses: haskell/actions/setup@v2
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: latest
+          enable-stack: true
+      - run: cabal update
+      - run: cabal new-test --enable-tests && cabal new-haddock
+<%={{  }}=%>
+
+{-# START_FILE fourmolu.yaml #-}
+---
+
+indentation: 4
+function-arrows: leading
+comma-style: leading
+import-export-style: leading
+record-brace-space: true
+newlines-between-decls: 2
+haddock-style: single-line
+haddock-style-module: multi-line
+
+{-# START_FILE CHANGELOG.md #-}
+# CHANGELOG
+
+## v0.1.0.0
+
+* Initial release
+
+{-# START_FILE src/Lib.hs #-}
+module Lib where
+

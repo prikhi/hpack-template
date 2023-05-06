@@ -1,8 +1,9 @@
-{-# START_FILE app/Main.hs #-}
-module Main where
+{-# START_FILE CHANGELOG.md #-}
+# CHANGELOG
 
-main :: IO ()
-main = putStrLn "hello world"
+## v0.1.0.0
+
+* Initial release
 
 {-# START_FILE README.md #-}
 # {{name}}
@@ -61,88 +62,21 @@ BSD-3
 
 {-# START_FILE Setup.hs #-}
 import Distribution.Simple
+
+
 main = defaultMain
 
-{-# START_FILE src/Lib.hs #-}
-module Lib where
+{-# START_FILE fourmolu.yaml #-}
+---
 
-{-# START_FILE .gitignore #-}
-.stack-work/
-
-{-# START_FILE tests/Spec.hs #-}
-import           Hedgehog
-import           Test.Tasty
-import           Test.Tasty.HUnit
-import           Test.Tasty.Hedgehog
-
-import qualified Hedgehog.Gen                  as Gen
-import qualified Hedgehog.Range                as Range
-
-
-main :: IO ()
-main = defaultMain tests
-
-
-tests :: TestTree
-tests = testGroup "Tests" [unitTests, properties]
-
-
-unitTests :: TestTree
-unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
-  where
-    testAddition :: Assertion
-    testAddition = (2 + 2) @?= (4 :: Integer)
-
-
-properties :: TestTree
-properties = testGroup
-    "Properties"
-    [testProperty "Addition is Communative" testAdditionCommunative]
-  where
-    testAdditionCommunative :: Property
-    testAdditionCommunative = property $ do
-        let genInt = Gen.int $ Range.linear 0 9001
-        (a, b) <- forAll $ (,) <$> genInt <*> genInt
-        (a + b) === (b + a)
-
-{-# START_FILE LICENSE #-}
-Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-
-    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-{-# START_FILE CHANGELOG.md #-}
-# CHANGELOG
-
-## v0.1.0.0
-
-* Initial release
+indentation: 4
+function-arrows: leading
+comma-style: leading
+import-export-style: leading
+record-brace-space: true
+newlines-between-decls: 2
+haddock-style: single-line
+haddock-style-module: multi-line
 
 {-# START_FILE .github/workflows/main.yml #-}
 {{=<% %>=}}
@@ -168,7 +102,7 @@ jobs:
     name: Stack
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Cache Stack Artifacts
         uses: actions/cache@v2
         with:
@@ -180,18 +114,18 @@ jobs:
             stack-build-lts-${{ github.ref }}-
             stack-build-lts-
             stack-build-
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@v2
         with:
           enable-stack: true
           stack-no-global: true
-      - run: stack test --fast --haddock --pedantic --resolver lts-18
+      - run: stack test --fast --haddock --pedantic --resolver lts-20
 
   # Stackage Nightly - Failures Allowed
   build-nightly:
     name: Stackage Nightly
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Get Current Date
         id: date
         run: echo -e "::set-output name=year::$(date +%Y)\n::set-output name=month::$(date +%m)\n::set-output name=day::$(date +%d)"
@@ -208,7 +142,7 @@ jobs:
             stack-build-nightly-${{ steps.date.outputs.year }}-${{ steps.date.outputs.month }}-
             stack-build-nightly-${{ steps.date.outputs.year }}-
             stack-build-nightly-
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@v2
         with:
           enable-stack: true
           stack-no-global: true
@@ -221,9 +155,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ['8.8', '8.10', '9.0']
+        ghc: ['8.10', '9.0', '9.2']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Cache Cabal Artifacts
         uses: actions/cache@v2
         with:
@@ -236,7 +170,7 @@ jobs:
             cabal-build-${{ matrix.ghc }}-${{ github.ref }}-
             cabal-build-${{ matrix.ghc }}-
             cabal-build-
-      - uses: haskell/actions/setup@v1
+      - uses: haskell/actions/setup@v2
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: latest
@@ -244,6 +178,43 @@ jobs:
       - run: cabal update
       - run: cabal new-test --enable-tests && cabal new-haddock
 <%={{  }}=%>
+
+{-# START_FILE tests/Spec.hs #-}
+import Hedgehog
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Tasty.Hedgehog
+
+import Hedgehog.Gen qualified as Gen
+import Hedgehog.Range qualified as Range
+
+
+main :: IO ()
+main = defaultMain tests
+
+
+tests :: TestTree
+tests = testGroup "Tests" [unitTests, properties]
+
+
+unitTests :: TestTree
+unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
+  where
+    testAddition :: Assertion
+    testAddition = (2 + 2) @?= (4 :: Integer)
+
+
+properties :: TestTree
+properties =
+    testGroup
+        "Properties"
+        [testProperty "Addition is Communative" testAdditionCommunative]
+  where
+    testAdditionCommunative :: Property
+    testAdditionCommunative = property $ do
+        let genInt = Gen.int $ Range.linear 0 9001
+        (a, b) <- forAll $ (,) <$> genInt <*> genInt
+        (a + b) === (b + a)
 
 {-# START_FILE package.yaml #-}
 ---
@@ -265,7 +236,7 @@ author:
 maintainer:
     {{author-email}}{{^author-email}}example@example.com{{/author-email}}
 copyright:
-    {{copyright}}{{^copyright}}{{year}}{{^year}}2021{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+    {{copyright}}{{^copyright}}{{year}}{{^year}}2023{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
 category:
     {{category}}{{^category}}Web{{/category}}
 extra-source-files:
@@ -282,22 +253,30 @@ description: |
     Maybe include a simple usage example.
 
 
+language: GHC2021
+
 ghc-options:
     - -Wall
     - -Wcompat
+    - -Wimplicit-lift
+    - -Wincomplete-patterns
     - -Wincomplete-record-updates
     - -Wincomplete-uni-patterns
+    - -Wmissing-exported-signatures
+    - -Wmissing-methods
+    - -Wmissing-signatures
+    - -Wname-shadowing
+    - -Wredundant-bang-patterns
     - -Wredundant-constraints
+    - -Wunused-packages
     - -O2
 
 default-extensions:
-    - DeriveGeneric
+    - DerivingStrategies
     - LambdaCase
-    - NamedFieldPuns
+    - MultiWayIf
     - OverloadedStrings
-    - TupleSections
-    - TypeApplications
-    - TypeOperators
+    - RecordWildCards
     - ViewPatterns
 
 
@@ -333,9 +312,56 @@ tests:
             - -threaded
             - -rtsopts
             - -with-rtsopts "-N -T"
+            - -Wno-unused-packages
         dependencies:
             - {{name}}
             - hedgehog
             - tasty
             - tasty-hedgehog
             - tasty-hunit
+
+{-# START_FILE LICENSE #-}
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+{-# START_FILE src/Lib.hs #-}
+module Lib where
+
+
+{-# START_FILE app/Main.hs #-}
+module Main where
+
+
+main :: IO ()
+main = putStrLn "hello world"
+
+{-# START_FILE .gitignore #-}
+.stack-work/
