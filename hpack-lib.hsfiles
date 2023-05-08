@@ -1,211 +1,3 @@
-{-# START_FILE .gitignore #-}
-.stack-work/
-
-{-# START_FILE LICENSE #-}
-Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-
-    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-{-# START_FILE package.yaml #-}
----
-
-name:
-    {{name}}
-version:
-    0.1.0.0
-github:
-    {{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}
-homepage:
-    https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme
-license:
-    BSD3
-license-file:
-    LICENSE
-author:
-    {{author-name}}{{^author-name}}Author name here{{/author-name}}
-maintainer:
-    {{author-email}}{{^author-email}}example@example.com{{/author-email}}
-copyright:
-    {{copyright}}{{^copyright}}{{year}}{{^year}}2021{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
-category:
-    {{category}}{{^category}}Web{{/category}}
-extra-source-files:
-    - README.md
-    - CHANGELOG.md
-
-
-synopsis:
-    Short, one-line summary of project here.
-
-description: |
-    Longer description of package here.
-
-    Maybe include a simple usage example.
-
-
-ghc-options:
-    - -Wall
-when:
-    condition:
-        impl(ghc >= 8.0)
-    then:
-        ghc-options:
-            - -Wcompat
-            - -Wincomplete-record-updates
-            - -Wincomplete-uni-patterns
-            - -Wredundant-constraints
-    else:
-        ghc-options:
-            - -fwarn-incomplete-record-updates
-            - -fwarn-incomplete-uni-patterns
-
-default-extensions:
-    - DeriveGeneric
-    - LambdaCase
-    - NamedFieldPuns
-    - OverloadedStrings
-    - TupleSections
-    - TypeApplications
-    - TypeOperators
-    - ViewPatterns
-
-
-dependencies:
-    - base >= 4.3 && < 5
-    - base-compat-batteries
-
-
-library:
-    source-dirs:
-        src
-    dependencies:
-        []
-
-tests:
-    {{name}}-test:
-        main: Spec.hs
-        source-dirs:
-            tests
-        ghc-options:
-            - -threaded
-            - -rtsopts
-            - -with-rtsopts "-N -T"
-        dependencies:
-            - {{name}}
-            - hedgehog
-            - tasty
-            - tasty-hedgehog
-            - tasty-hunit
-
-{-# START_FILE Setup.hs #-}
-import Distribution.Simple
-
-
-main = defaultMain
-
-{-# START_FILE tests/Spec.hs #-}
-import Hedgehog
-import Test.Tasty
-import Test.Tasty.HUnit
-import Test.Tasty.Hedgehog
-
-import Hedgehog.Gen qualified as Gen
-import Hedgehog.Range qualified as Range
-
-
-main :: IO ()
-main = defaultMain tests
-
-
-tests :: TestTree
-tests = testGroup "Tests" [unitTests, properties]
-
-
-unitTests :: TestTree
-unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
-  where
-    testAddition :: Assertion
-    testAddition = (2 + 2) @?= (4 :: Integer)
-
-
-properties :: TestTree
-properties =
-    testGroup
-        "Properties"
-        [testProperty "Addition is Communative" testAdditionCommunative]
-  where
-    testAdditionCommunative :: Property
-    testAdditionCommunative = property $ do
-        let genInt = Gen.int $ Range.linear 0 9001
-        (a, b) <- forAll $ (,) <$> genInt <*> genInt
-        (a + b) === (b + a)
-
-{-# START_FILE README.md #-}
-# {{name}}
-
-[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
-
-
-Describe your project here.
-
-Requires [`stack`][get-stack]:
-
-[get-stack]: https://docs.haskellstack.org/en/stable/README/
-
-
-## Build
-
-You can build the project with stack:
-
-```sh
-stack build
-```
-
-For development, you can enable fast builds with file-watching,
-documentation-building, & test-running:
-
-```sh
-stack test --haddock --fast --file-watch --pedantic
-```
-
-To build & open the documentation, run:
-
-```sh
-stack haddock --open {{name}}
-```
-
-
-## LICENSE
-
-BSD-3
-
 {-# START_FILE .github/workflows/main.yml #-}
 {{=<% %>=}}
 ---
@@ -313,6 +105,93 @@ jobs:
       - run: cabal new-test --enable-tests && cabal new-haddock
 <%={{  }}=%>
 
+{-# START_FILE .gitignore #-}
+.stack-work/
+
+{-# START_FILE CHANGELOG.md #-}
+# CHANGELOG
+
+## v0.1.0.0
+
+* Initial release
+
+{-# START_FILE LICENSE #-}
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+{-# START_FILE README.md #-}
+# {{name}}
+
+[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
+
+
+Describe your project here.
+
+Requires [`stack`][get-stack]:
+
+[get-stack]: https://docs.haskellstack.org/en/stable/README/
+
+
+## Build
+
+You can build the project with stack:
+
+```sh
+stack build
+```
+
+For development, you can enable fast builds with file-watching,
+documentation-building, & test-running:
+
+```sh
+stack test --haddock --fast --file-watch --pedantic
+```
+
+To build & open the documentation, run:
+
+```sh
+stack haddock --open {{name}}
+```
+
+
+## LICENSE
+
+BSD-3
+
+{-# START_FILE Setup.hs #-}
+import Distribution.Simple
+
+
+main = defaultMain
+
 {-# START_FILE fourmolu.yaml #-}
 ---
 
@@ -325,13 +204,134 @@ newlines-between-decls: 2
 haddock-style: single-line
 haddock-style-module: multi-line
 
-{-# START_FILE CHANGELOG.md #-}
-# CHANGELOG
+{-# START_FILE package.yaml #-}
+---
 
-## v0.1.0.0
+name:
+    {{name}}
+version:
+    0.1.0.0
+github:
+    {{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}
+homepage:
+    https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}#readme
+license:
+    BSD3
+license-file:
+    LICENSE
+author:
+    {{author-name}}{{^author-name}}Author name here{{/author-name}}
+maintainer:
+    {{author-email}}{{^author-email}}example@example.com{{/author-email}}
+copyright:
+    {{copyright}}{{^copyright}}{{year}}{{^year}}2021{{/year}} {{author-name}}{{^author-name}}Author name here{{/author-name}}{{/copyright}}
+category:
+    {{category}}{{^category}}Web{{/category}}
+extra-source-files:
+    - README.md
+    - CHANGELOG.md
 
-* Initial release
+
+synopsis:
+    Short, one-line summary of project here.
+
+description: |
+    Longer description of package here.
+
+    Maybe include a simple usage example.
+
+
+ghc-options:
+    - -Wall
+when:
+    condition:
+        impl(ghc >= 8.0)
+    then:
+        ghc-options:
+            - -Wcompat
+            - -Wincomplete-record-updates
+            - -Wincomplete-uni-patterns
+            - -Wredundant-constraints
+    else:
+        ghc-options:
+            - -fwarn-incomplete-record-updates
+            - -fwarn-incomplete-uni-patterns
+
+default-extensions:
+    - DeriveGeneric
+    - LambdaCase
+    - NamedFieldPuns
+    - OverloadedStrings
+    - TupleSections
+    - TypeApplications
+    - TypeOperators
+    - ViewPatterns
+
+
+dependencies:
+    - base >= 4.3 && < 5
+    - base-compat-batteries
+
+
+library:
+    source-dirs:
+        src
+    dependencies:
+        []
+
+tests:
+    {{name}}-test:
+        main: Spec.hs
+        source-dirs:
+            tests
+        ghc-options:
+            - -threaded
+            - -rtsopts
+            - -with-rtsopts "-N -T"
+        dependencies:
+            - {{name}}
+            - hedgehog
+            - tasty
+            - tasty-hedgehog
+            - tasty-hunit
 
 {-# START_FILE src/Lib.hs #-}
 module Lib where
 
+
+{-# START_FILE tests/Spec.hs #-}
+import Hedgehog
+import Test.Tasty
+import Test.Tasty.HUnit
+import Test.Tasty.Hedgehog
+
+import Hedgehog.Gen qualified as Gen
+import Hedgehog.Range qualified as Range
+
+
+main :: IO ()
+main = defaultMain tests
+
+
+tests :: TestTree
+tests = testGroup "Tests" [unitTests, properties]
+
+
+unitTests :: TestTree
+unitTests = testGroup "Unit Tests" [testCase "2+2 = 4" testAddition]
+  where
+    testAddition :: Assertion
+    testAddition = (2 + 2) @?= (4 :: Integer)
+
+
+properties :: TestTree
+properties =
+    testGroup
+        "Properties"
+        [testProperty "Addition is Communative" testAdditionCommunative]
+  where
+    testAdditionCommunative :: Property
+    testAdditionCommunative = property $ do
+        let genInt = Gen.int $ Range.linear 0 9001
+        (a, b) <- forAll $ (,) <$> genInt <*> genInt
+        (a + b) === (b + a)

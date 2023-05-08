@@ -1,6 +1,3 @@
-{-# START_FILE .gitignore #-}
-.stack-work/
-
 {-# START_FILE .github/workflows/main.yml #-}
 {{=<% %>=}}
 ---
@@ -101,6 +98,130 @@ jobs:
       - run: cabal update
       - run: cabal new-test --enable-tests && cabal new-haddock
 <%={{  }}=%>
+
+{-# START_FILE .gitignore #-}
+.stack-work/
+
+{-# START_FILE CHANGELOG.md #-}
+# CHANGELOG
+
+## v0.1.0.0
+
+* Initial release
+
+{-# START_FILE LICENSE #-}
+Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+{-# START_FILE README.md #-}
+# {{name}}
+
+[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
+
+
+Describe your project here.
+
+Requires [`stack`][get-stack]:
+
+```sh
+stack run
+```
+
+[get-stack]: https://docs.haskellstack.org/en/stable/README/
+
+
+## Install
+
+You can install the CLI exe by running `stack install`. This lets you call the
+executable directly instead of through stack:
+
+```sh
+stack install
+export PATH="${HOME}/.local/bin/:${PATH}"
+{{name}}
+```
+
+
+## Build
+
+You can build the project with stack:
+
+```sh
+stack build
+```
+
+For development, you can enable fast builds with file-watching,
+documentation-building, & test-running:
+
+```sh
+stack test --haddock --fast --file-watch --pedantic
+```
+
+To build & open the documentation, run:
+
+```sh
+stack haddock --open {{name}}
+```
+
+
+## LICENSE
+
+BSD-3
+
+{-# START_FILE Setup.hs #-}
+import Distribution.Simple
+
+
+main = defaultMain
+
+{-# START_FILE app/Main.hs #-}
+module Main where
+
+import Lib.Main
+
+
+main :: IO ()
+main = getArgs >>= run
+
+{-# START_FILE fourmolu.yaml #-}
+---
+
+indentation: 4
+function-arrows: leading
+comma-style: leading
+import-export-style: leading
+record-brace-space: true
+newlines-between-decls: 2
+haddock-style: single-line
+haddock-style-module: multi-line
 
 {-# START_FILE package.yaml #-}
 ---
@@ -206,10 +327,6 @@ tests:
             - tasty-hedgehog
             - tasty-hunit
 
-{-# START_FILE src/Lib.hs #-}
-module Lib where
-
-
 {-# START_FILE src/Lib/Main.hs #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
@@ -265,27 +382,9 @@ argSpec =
         &= helpArg [name "h"]
         &= help "Short, one-line summary of project here."
 
-{-# START_FILE Setup.hs #-}
-import Distribution.Simple
+{-# START_FILE src/Lib.hs #-}
+module Lib where
 
-
-main = defaultMain
-
-{-# START_FILE app/Main.hs #-}
-module Main where
-
-import Lib.Main
-
-
-main :: IO ()
-main = getArgs >>= run
-
-{-# START_FILE CHANGELOG.md #-}
-# CHANGELOG
-
-## v0.1.0.0
-
-* Initial release
 
 {-# START_FILE tests/Spec.hs #-}
 import Hedgehog
@@ -323,102 +422,3 @@ properties =
         let genInt = Gen.int $ Range.linear 0 9001
         (a, b) <- forAll $ (,) <$> genInt <*> genInt
         (a + b) === (b + a)
-
-{-# START_FILE fourmolu.yaml #-}
----
-
-indentation: 4
-function-arrows: leading
-comma-style: leading
-import-export-style: leading
-record-brace-space: true
-newlines-between-decls: 2
-haddock-style: single-line
-haddock-style-module: multi-line
-
-{-# START_FILE README.md #-}
-# {{name}}
-
-[![{{name}} Build Status](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml/badge.svg)](https://github.com/{{github-username}}{{^github-username}}githubuser{{/github-username}}/{{name}}/actions/workflows/main.yml)
-
-
-Describe your project here.
-
-Requires [`stack`][get-stack]:
-
-```sh
-stack run
-```
-
-[get-stack]: https://docs.haskellstack.org/en/stable/README/
-
-
-## Install
-
-You can install the CLI exe by running `stack install`. This lets you call the
-executable directly instead of through stack:
-
-```sh
-stack install
-export PATH="${HOME}/.local/bin/:${PATH}"
-{{name}}
-```
-
-
-## Build
-
-You can build the project with stack:
-
-```sh
-stack build
-```
-
-For development, you can enable fast builds with file-watching,
-documentation-building, & test-running:
-
-```sh
-stack test --haddock --fast --file-watch --pedantic
-```
-
-To build & open the documentation, run:
-
-```sh
-stack haddock --open {{name}}
-```
-
-
-## LICENSE
-
-BSD-3
-
-{-# START_FILE LICENSE #-}
-Copyright {{author-name}}{{^author-name}}Author name here{{/author-name}} (c) {{year}}{{^year}}2019{{/year}}
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-
-    * Neither the name of {{author-name}}{{^author-name}}Author name here{{/author-name}} nor the names of other
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
